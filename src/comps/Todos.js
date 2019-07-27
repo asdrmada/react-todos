@@ -9,12 +9,10 @@ export class Todos extends Component {
         super(props);
 
         this.state = {
-            endpoint: 'localhost:3000',
-            toDos :[
-                'Test listing',
-                'test 2'
-            ]
+            endpoint: 'localhost:5000',
+            toDos:[]
         }
+        this.create = this.create.bind(this);
     }
 
     send = () => {
@@ -23,24 +21,30 @@ export class Todos extends Component {
     }
 
     componentDidMount = () => {
-        const socket = socketIOClient(this.state.endpoint);
-        setInterval(this.send(), 1000)
-        socket.on('update list');
+        const { endpoint } = this.state;
+        const socket = socketIOClient(endpoint);
+        socket.on('update list', (data) => this.setState({response:data}));
     }
+
+    create(newTodo) {
+        this.setState({
+          toDos: [...this.state.toDos, newTodo]
+        });
+      }
 
     render() {
 
         const listProp = this.state.toDos.map((todo) => 
-            <h4>{todo}</h4>
+            <li><h4>{todo}</h4><p>Done</p></li>
         );
 
         return (
             <div>
                 <ul>
-                    <li>
-                        <ShowTodo todoProp={listProp}></ShowTodo>
-                    </li>
+                    <ShowTodo todoProp={listProp}></ShowTodo>
                 </ul>
+
+                <NewTodo createTodo={this.create}></NewTodo>
             </div>
         )
     }

@@ -4,7 +4,7 @@ export class ShowTodo extends Component {
     render() {
         return (
             <div>
-                {this.props.todoProp}<p>Done</p>
+                {this.props.todoProp}
             </div>
         )
     }
