@@ -10,26 +10,33 @@ export class Todos extends Component {
 
         this.state = {
             endpoint: 'localhost:5000',
+            response: false,
+
             toDos:[]
         }
         this.create = this.create.bind(this);
+        this.send   = this.send.bind(this);
     }
 
-    send = () => {
-        const socket = socketIOClient(this.state.endpoint);
-        socket.emit('update list', this.state.toDos)
-    }
-
+    // Socket functions/client Set-up
     componentDidMount = () => {
-        const { endpoint } = this.state;
-        const socket = socketIOClient(endpoint);
-        socket.on('update list', (data) => this.setState({response:data}));
+        const socket = socketIOClient(this.state.endpoint);
+        socket.on('update list', (data) => this.setState({toDos:data}));
+    }
+    componentWillUnmount = () => {
+        const socket = socketIOClient(this.state.endpoint);
+        socket.removeListener('data', this.handleData);
+    }
+    send() {
+        const socket = socketIOClient(this.state.endpoint);
+        socket.emit('update list', {list:'update list'});
     }
 
     create(newTodo) {
         this.setState({
           toDos: [...this.state.toDos, newTodo]
         });
+       this.send()
       }
 
     render() {
@@ -44,7 +51,7 @@ export class Todos extends Component {
                     <ShowTodo todoProp={listProp}></ShowTodo>
                 </ul>
 
-                <NewTodo createTodo={this.create}></NewTodo>
+                <NewTodo createTodo={this.create} addSocket={this.send}></NewTodo>
             </div>
         )
     }
